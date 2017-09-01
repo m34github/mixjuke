@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {MuiThemeProvider} from 'material-ui/styles';
@@ -17,7 +19,7 @@ class App extends React.Component {
                 {
                     key: 'note2',
                     title: 'note2',
-                    audio: {}
+                    audio: '//localhost:3000/assets/Kitty.mp3'
                 }
             ],
             playing: false
@@ -31,9 +33,29 @@ class App extends React.Component {
             this.setState({playing: !this.state.playing});
         };
 
+        let request = (e) => {
+            axios({
+                method: 'get',
+                url: '//localhost:3000/audio-concat',
+                params: {
+                    audio: this.state.notes[0].audio
+                }
+            })
+            .then((res) => {
+                console.log(res);
+            });
+        };
+
         let load = (e) => {
-            let audio = e.target.files[0];
-            console.log(audio);
+            let audioFile = e.target.files[0];
+            let audioUrl = URL.createObjectURL(audioFile);
+            notes = notes.map((item, index, array) => {
+                if (item.title === 'note1') {
+                    item.audio = audioUrl.substr(audioUrl.indexOf(':') + 1);
+                }
+                return item;
+            });
+            console.log(audioUrl);
         };
 
         return (
@@ -56,7 +78,8 @@ class App extends React.Component {
                             ))
                         }
                     </GridList>
-                    <RaisedButton label={this.state.playing === true ? "Pause" : "Play"} onClick={play} primary={!this.state.playing} />
+                    <RaisedButton label='Request' onClick={request} primary={true} />
+                    <RaisedButton label={this.state.playing === true ? "Pause" : "Play"} onClick={play} secondary={!this.state.playing} />
                     <ReactHowler id="audio" src={this.state.notes[0].audio} playing={this.state.playing} />
                 </section>
             </MuiThemeProvider>
